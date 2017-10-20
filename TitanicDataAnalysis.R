@@ -227,7 +227,7 @@ ggplot(data.combined[1:891,], aes(x = family.size, fill = survived)) +
   labs(fill = "Survived")
 
 ###Comment###
-#The bigger family suze the survival rate deacreses
+#The bigger family size is => the survival rate deacreses
 
 
 
