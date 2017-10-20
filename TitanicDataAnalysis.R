@@ -126,6 +126,110 @@ ggplot(data.combined[1:891,], aes(x = title, fill = survived)) +
   ylab("Total Count") +
   labs(fill = "Survived")
 
+# Just to be thorough, take a look at survival rates broken out by sex, pclass, and age
+ggplot(data.combined[1:891,], aes(x = age, fill = survived)) +
+  facet_wrap(~sex + pclass) +
+  geom_histogram(binwidth = 10) +
+  xlab("Age") +
+  ylab("Total Count")
+
+
+#Age distribution as you can see Master describes childreen o
+
+ ggplot(data.combined[1:891,], aes(x = Sex) )+
+    geom_bar() +
+     facet_wrap(~title) + 
+     ggtitle("Age Distibution") +
+     xlab("Title") +
+     ylab("Total Count") 
+# Validate that "Master." is a good proxy for children
+boys <- data.combined[which(data.combined$title == "Master."),]
+summary(boys$age)
+
+#Sex distribution for each title . As you can see Master are all Males
+
+ ggplot(data.combined[1:891,], aes(x = Sex) )+
+     geom_bar() +
+     facet_wrap(~title) + 
+     ggtitle("Sex Distibution") +
+     xlab("Title") +
+
+# We know that "Miss." is more complicated, let's examine further
+#As you can see 'Miss.' contain all the age range not like 'Mr.'
+misses <- data.combined[which(data.combined$title == "Miss."),]
+summary(misses$age)
+
+ggplot(misses[misses$survived != "None",], aes(x = age, fill = survived)) +
+  facet_wrap(~pclass) +
+  geom_histogram(binwidth = 5) +
+  ggtitle("Age for 'Miss.' by Pclass") + 
+  xlab("Age") +
+  ylab("Total Count")
+
+# OK, appears female children may have different survival rate, 
+# could be a candidate for feature engineering later
+misses.alone <- misses[which(misses$sibsp == 0 & misses$parch == 0),]
+summary(misses.alone$age)
+length(which(misses.alone$age <= 14.5)) #lenght = 4
+#So if you're traveling alone with the statut of 'Miss.' then you're an adult bcs we have only 4 childreen
+
+# Move on to the sibsp variable, summarize the variable
+summary(data.combined$sibsp)
+#Media = 0 => 50% of the passenger have sibsp =0 => si the values could be limited
+# Can we treat as a factor?
+length(unique(data.combined$sibsp)) #=7 => so it's logical to transform it to a factor
+data.combined$sibsp <- as.factor(data.combined$sibsp)
+
+#That would help us in visualization
+# We believe title is predictive. Visualize survival reates by sibsp, pclass, and title
+ggplot(data.combined[1:891,], aes(x = sibsp, fill = survived)) +
+  geom_bar() +
+  facet_wrap(~pclass + title) + 
+  ggtitle("Pclass, Title") +
+  xlab("SibSp") +
+  ylab("Total Count") +
+  ylim(0,300) +
+  labs(fill = "Survived")
+
+####Comment####
+#One of the interesting things here is : if you're 'Master.' in 3rd class you have more survival rate if you're travelling with smaller
+#nb of siblings(small family) bcs your parents could easly look for you
+#If you're an adult man traveling in 3rd class & travelling alone you will have less survival rate 
+
+# Treat the parch vaiable as a factor and visualize
+data.combined$parch <- as.factor(data.combined$parch)
+ggplot(data.combined[1:891,], aes(x = parch, fill = survived)) +
+  geom_bar() +
+  facet_wrap(~pclass + title) + 
+  ggtitle("Pclass, Title") +
+  xlab("ParCh") +
+  ylab("Total Count") +
+  ylim(0,300) +
+  labs(fill = "Survived")
+
+###Comment###
+#'Mr.' in 1st cass => if you're traveling with no child you're more likely to survive than if u had childreen
+#Same case for 'Mrs.' in the 3rd class 
+
+# Let's try some feature engineering. What about creating a family size feature?
+temp.sibsp <- c(train$sibsp, test$sibsp)
+temp.parch <- c(train$parch, test$parch)
+data.combined$family.size <- as.factor(temp.sibsp + temp.parch + 1)
+
+# Visualize it to see if it is predictive
+ggplot(data.combined[1:891,], aes(x = family.size, fill = survived)) +
+  geom_bar() +
+  facet_wrap(~pclass + title) + 
+  ggtitle("Pclass, Title") +
+  xlab("family.size") +
+  ylab("Total Count") +
+  ylim(0,300) +
+  labs(fill = "Survived")
+
+###Comment###
+#The bigger family suze the survival rate deacreses
+
+
 
 
 
